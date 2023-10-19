@@ -1,0 +1,84 @@
+#!/usr/bin/python3
+
+import sys
+from math import factorial, pow
+import os
+
+def usage():
+    print(
+        "USAGE\n"
+        "    ./309pollution n file x y\n\n"
+        "DESCRIPTION\n"
+        "    n\t   number of points on the grid axis\n"
+        "    file\t   csv file containing the data points x;y;p\n"
+        "    x\t   abscissa of the point whose pollution level we want to know\n"
+        "    y\t   ordinate of the point whose pollution level we want to know\n")
+
+def algo(f, n, x, y):
+    data = []
+    mult = 0
+    for i in range(n + 1):
+        tmp = []
+        for j in range(n + 1):
+            tmp.append(0)
+        data.append(tmp)
+    for i in range(0, len(f)):
+        data[f[i][1]][f[i][0]] = f[i][2]
+    for i in range(n + 1):
+        for j in range(n + 1):
+            tmp = calc(y, n , i)
+            tmp *= calc(x, n , j)
+            tmp *= data[i][j]
+            mult += tmp
+            j += 1
+        i += 1
+    print("%.2f" % mult)
+
+def check_int(nb1, nb2, nb3):
+    try:
+        ex1 = int(nb1)
+        ex2 = float(nb2)
+        ex3 = float(nb3)
+    except ValueError:
+        print("the args must be an int", file=sys.stderr)
+        exit(84)
+
+def check_file(f):
+    try:
+        data = []
+        for i in range(0, len(f)):
+            f[i] = f[i].replace('\n', '')
+        for i in range(0, len(f)):
+            data.append(f[i].split(';'))
+        for i in range(0, len(data)):
+            for y in range(0, len(data[i])):
+                data[i][y] = int(data[i][y])
+        return (data)
+    except ValueError:
+        print("the file nb must be a float", file=sys.stderr)
+        exit(84)
+        
+def calc(coo, n, it):
+    x = factorial(n) / (factorial(it) * factorial(n - it))
+    y = pow(coo, it)
+    i = pow(1 - coo, n - it)
+    return (x * y * i)
+
+def main(av):
+    if (len(av) == 2 and av[1] == "-h"):
+        usage()
+        exit(0)
+    if (len(av) == 5 and os.path.isfile(av[2])):
+        check_int(av[1], av[3], av[4])
+        if float(av[1]) < 0 or float(av[3]) < 0 or float(av[3]) > float(av[1]) or float(av[4]) < 0 or float(av[4]) > float(av[1]):
+            exit(84)
+        f = open(av[2], "r")
+        f = f.readlines()
+        data = check_file(f)
+        algo(data, int(av[1]) - 1, float(av[3]) / (int(av[1]) - 1), float(av[4]) / (int(av[1]) - 1))
+    else:
+        usage()
+        exit(84)
+
+if __name__ == '__main__':
+    main(sys.argv)
